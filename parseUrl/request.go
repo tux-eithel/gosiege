@@ -29,7 +29,7 @@ type Requests struct {
 func NewRequests() *Requests {
 	return &Requests{
 		Rand: rand.New(rand.NewSource(time.Now().UnixNano())),
-		Cont: 0,
+		Cont: -1,
 	}
 }
 
@@ -41,13 +41,13 @@ func (r *Requests) NextUri(isRandom bool) *InputRequest {
 	if isRandom {
 		return r.Reqs[r.Rand.Intn(len(r.Reqs))]
 	}
-	next := r.Cont + 1
-	if next == len(r.Reqs) {
-		next = 0
+
+	if r.Cont+1 == len(r.Reqs) {
+		r.Cont = 0
 	} else {
 		r.Cont++
 	}
-	return r.Reqs[next]
+	return r.Reqs[r.Cont]
 }
 
 func init() {
