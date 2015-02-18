@@ -6,29 +6,31 @@ import (
 	"strings"
 )
 
-// A Urls rappresent an array of strings
-type Urls []string
-
-// String returns all urls in a single string
-func (u *Urls) String() string {
-	return fmt.Sprint(*u)
+type FlagUrl struct {
+	Req *Requests
 }
 
-// Set splits input string by space and use them as url. If string is not a valid url, it'll be skipped
-func (u *Urls) Set(srt string) error {
-	app := strings.Split(srt, " ")
+func (fu *FlagUrl) Init() {
+	fu.Req = NewRequests()
+}
 
+func (fu *FlagUrl) String() string {
+	var srt []string
+	for i := 0; i < len(fu.Req.Reqs); i++ {
+		srt = append(srt, fu.Req.Reqs[i].Url)
+	}
+	return strings.Join(srt, ",")
+}
+
+func (fu *FlagUrl) Set(srt string) error {
+	fu.Req = NewRequests()
+	app := strings.Split(srt, " ")
 	for _, value := range app {
 		_, err := url.Parse(value)
 		if err != nil {
 			fmt.Println("Url: ", value, "not correct, skipped")
 		}
-		*u = append(*u, value)
+		fu.Req.AddRequest(NewInputRequest(value))
 	}
 	return nil
-}
-
-// Return a random url
-func (u Urls) GetRandomUri() (*string, error) {
-	return &(u)[0], nil
 }
