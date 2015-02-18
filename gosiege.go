@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/url"
+	_ "net/url"
 	"time"
 
 	"bitbucket.org/tux-eithel/gosiege/parseUrl"
@@ -16,12 +16,18 @@ var numberConcurrent int
 var secToWait time.Duration
 
 // -u param
-var listUrls parseUrl.Urls
+var listUrls parseUrl.FlagUrl
+
+// -f param
+var inputFile string
 
 func init() {
+
+	listUrls.Init()
 	flag.IntVar(&numberConcurrent, "n", 1, "Number of concurrent request")
 	flag.DurationVar(&secToWait, "s", time.Duration(1)*time.Second, "Time to wait until next request")
 	flag.Var(&listUrls, "u", "Url(s) to test")
+	flag.StringVar(&inputFile, "f", "", "Input file with urls")
 }
 
 func main() {
@@ -30,24 +36,20 @@ func main() {
 	//	fmt.Println(secToWait)
 	//	fmt.Println(listUrls.String())
 
-	for i := 0; i < len(listUrls); i++ {
-		ToRun(&listUrls)
+	for i := 0; i < len(listUrls.Req.Reqs); i++ {
+		ToRun(listUrls.Req)
 	}
 }
 
-func ToRun(totest parseUrl.RandomUri) error {
-
-	var uri *url.URL
-	var srt *string
-	var err error
+func ToRun(totest *parseUrl.Requests) error {
 
 	//	for {
-	srt, err = totest.GetRandomUri()
-	if err != nil {
-		return err
+	req := totest.NextUri(false)
+	if req == nil {
+		fmt.Println("Qualcosa di sbagliato")
 	}
-	uri, err = url.Parse(*srt)
-	fmt.Printf("%#v\n", uri)
+
+	fmt.Printf("%#v\n", req)
 	// do Stuff
 	time.Sleep(secToWait)
 	//	}
