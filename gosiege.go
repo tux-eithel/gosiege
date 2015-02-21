@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	_ "io/ioutil"
 	_ "log"
+	"net/http"
 	_ "net/url"
 	"os"
 	"os/signal"
@@ -100,16 +102,44 @@ func ToRun(totest *parseUrl.Requests, randomUrl bool, nextChannel chan int, shut
 		if !randomUrl {
 			<-nextChannel
 		}
+		// in this way we are synchronizing only the phase to retrieve the next uri, not
 		req := totest.NextUri(randomUrl)
+
 		if !randomUrl {
 			nextChannel <- 1
 		}
 
 		if req == nil {
-			fmt.Println("Qualcosa di sbagliato")
+
+			fmt.Println("Seems strage, no Url recover")
+
+		} else {
+
+			t0 := time.Now()
+			r, err := http.DefaultClient.Do(req.ReadyUrl)
+			diff := time.Since(t0)
+
+			if err != nil {
+
+				fmt.Printf("Response Error: %v | Response Object:  %+v\n", err, r)
+				// return body, statusCode, response_headers, err
+
+			} else {
+
+				defer r.Body.Close()
+				//				response_body, _ := ioutil.ReadAll(r.Body)
+				//				fmt.Println(response_body)
+				path := "/"
+				if req.ReadyUrl.URL.Path != "" {
+					path = req.ReadyUrl.URL.Path
+				}
+
+				fmt.Println(r.StatusCode, fmt.Sprintf("%.2fs", diff.Seconds()), path)
+
+			}
+
 		}
 
-		fmt.Printf("%#v\n", req.Url)
 		// do Stuff
 		time.Sleep(secToWait)
 
