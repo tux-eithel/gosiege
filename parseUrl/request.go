@@ -6,18 +6,48 @@ import (
 )
 
 type InputRequest struct {
-	Method string
-	Url    string
-	Header map[string]string
-	Body   string
-	Param  map[string]string
+	Method   string
+	Url      string
+	Header   map[string]string
+	Body     []byte
+	Param    map[string]string
+	ReadyUrl *http.Request
 }
 
-func NewInputRequest(url string) *InputRequest {
-	return &InputRequest{
-		Method: "GET",
-		Url:    url,
+func NewInputRequest(inputUrl string) (*InputRequest, error) {
+
+	u, err := url.Parse(inputUrl)
+	if err != nil {
+		return nil, err
 	}
+	if u.Host == "" {
+		inputUrl = "//" + inputUrl
+	}
+	if u.Scheme == "" {
+		inputUrl = "http:" + inputUrl
+	}
+
+	in := &InputRequest{
+		Method: "GET",
+		Url:    inputUrl,
+	}
+
+	req, err := http.NewRequest(in.Method, in.Url, bytes.NewBuffer(in.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	if req.URL.Scheme == "" {
+		req.URL.Scheme = "http"
+	}
+
+	for key, value := range in.Header {
+		req.Header.Set(key, value)
+	}
+
+	in.ReadyUrl = req
+
+	return in, nil
 }
 
 type Requests struct {
