@@ -1,7 +1,11 @@
 package parseUrl
 
 import (
+	"bytes"
+	_ "fmt"
 	"math/rand"
+	"net/http"
+	"net/url"
 	"time"
 )
 
