@@ -60,7 +60,7 @@ func main() {
 
 	shutdownChannel := make(chan bool)
 
-	nextChannel := make(chan int)
+	nextChannel := make(chan int, 1)
 
 	waitGroup := &sync.WaitGroup{}
 
