@@ -68,10 +68,6 @@ func main() {
 		go ToRun(listUrls.Req, randomUrl, nextChannel, shutdownChannel, waitGroup)
 	}
 
-	if !randomUrl {
-		nextChannel <- 1
-	}
-
 	<-quitChannel
 	shutdownChannel <- true
 	fmt.Println("Received quit. Sending shutdown and waiting on goroutines...")
@@ -93,15 +89,7 @@ func ToRun(totest *libgosiege.Requests, randomUrl bool, nextChannel chan int, sh
 		default:
 		}
 
-		if !randomUrl {
-			<-nextChannel
-		}
-		// in this way we are synchronizing only the phase to retrieve the next uri, not
 		req := totest.NextUri(randomUrl)
-
-		if !randomUrl {
-			nextChannel <- 1
-		}
 
 		if req == nil {
 
