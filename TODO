@@ -1,4 +1,5 @@
 Some thoughts about the project:
 
- * define command line
- * read command line
+ * create a goroutine for handling the response data:
+	data as url, time and qta byte, will be pass as a struct to a goroutine using a buffered channel.
+	This goroutine has the task to print data, update global data and when program will shut-down print the results data
