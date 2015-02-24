@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	_ "io/ioutil"
+	"io/ioutil"
 	_ "log"
 	"net/http"
 	_ "net/url"
@@ -53,6 +53,8 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
+	dataChannel := make(chan *libgosiege.SimpleCounter, numberConcurrent*2)
+
 	quitChannel := make(chan os.Signal)
 	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
 
@@ -63,7 +65,7 @@ func main() {
 	waitGroup.Add(1)
 
 	for i := 0; i < numberConcurrent; i++ {
-		go ToRun(listUrls.Req, randomUrl, shutdownChannel, waitGroup)
+		go ToRun(listUrls.Req, dataChannel, randomUrl, shutdownChannel, waitGroup)
 	}
 
 	<-quitChannel
@@ -75,7 +77,7 @@ func main() {
 	fmt.Println("Done.")
 }
 
-func ToRun(totest *libgosiege.Requests, randomUrl bool, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
+func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCounter, randomUrl bool, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
 
 	defer waitGroup.Done()
 	for {
@@ -108,14 +110,15 @@ func ToRun(totest *libgosiege.Requests, randomUrl bool, shutdownChannel chan boo
 
 				defer r.Body.Close()
 
-				// TODO: here we'll put goroutine to manage result data
-
-				path := "/"
-				if req.ReadyUrl.URL.Path != "" {
-					path = req.ReadyUrl.URL.Path
+				body, err := ioutil.ReadAll(r.Body)
+				qtaBody := -1
+				if err == nil {
+					qtaBody = len(body)
 				}
 
-				fmt.Println(r.StatusCode, fmt.Sprintf("%.2fs", diff.Seconds()), path)
+				// TODO: here we'll put goroutine to manage result data
+
+				dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, req.ReadyUrl.URL.Path)
 
 			}
 
