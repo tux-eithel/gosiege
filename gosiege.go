@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"bitbucket.org/tux-eithel/gosiege/lib"
+	"bitbucket.org/tux-eithel/gosiege/libgosiege"
 )
 
 // -n param
@@ -24,7 +24,7 @@ var numberConcurrent int
 var secToWait time.Duration
 
 // -u param
-var listUrls parseUrl.FlagUrl
+var listUrls libgosiege.FlagUrl
 
 // -f param
 var inputFile string
@@ -81,7 +81,7 @@ func main() {
 	fmt.Println("Done.")
 }
 
-func ToRun(totest *parseUrl.Requests, randomUrl bool, nextChannel chan int, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
+func ToRun(totest *libgosiege.Requests, randomUrl bool, nextChannel chan int, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
 
 	defer waitGroup.Done()
 	for {

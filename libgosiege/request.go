@@ -1,4 +1,4 @@
-package parseUrl
+package libgosiege
 
 import (
 	"bytes"
