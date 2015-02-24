@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// InputRequest represents a parsed url from cli or file
 type InputRequest struct {
 	Method   string
 	Url      string
@@ -18,6 +19,10 @@ type InputRequest struct {
 	ReadyUrl *http.Request
 }
 
+// NewInputRequest creates a new InputRequest from a url string.
+// The new InputRequest is a basic GET request.
+// The function also modify the input url adding Host and Scheme if not specified.
+// For example google.com becames http://google.com
 func NewInputRequest(inputUrl string) (*InputRequest, error) {
 
 	u, err := url.Parse(inputUrl)
@@ -50,12 +55,16 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 	return in, nil
 }
 
+// Requests keeps all the InputRequest in one array.
+// Its structure also contains the current-1 object to extract in case of sequential reading,
+// or an object for random number generation in case of random reading
 type Requests struct {
 	Reqs []*InputRequest
 	Rand *rand.Rand
 	Cont int
 }
 
+// NewRequests inizialize a Requests object
 func NewRequests() *Requests {
 	return &Requests{
 		Rand: rand.New(rand.NewSource(time.Now().UnixNano())),
@@ -63,10 +72,14 @@ func NewRequests() *Requests {
 	}
 }
 
+// AddRequest add to a Requests an InputRequest
+// Don't use NewInputRequest directly as an argument. NewInputRequest may return errors!
 func (r *Requests) AddRequest(ir *InputRequest) {
 	r.Reqs = append(r.Reqs, ir)
 }
 
+// NextUri return the next uri to be processed. If isRandom is true, a random url from input is returned, else the next one in order.
+// Pass isRandom as false value is useful if you want to process all the input urls
 func (r *Requests) NextUri(isRandom bool) *InputRequest {
 	if isRandom {
 		return r.Reqs[r.Rand.Intn(len(r.Reqs))]
@@ -80,6 +93,7 @@ func (r *Requests) NextUri(isRandom bool) *InputRequest {
 	return r.Reqs[r.Cont]
 }
 
+// init set the Seed for random number
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
