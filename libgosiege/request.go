@@ -41,10 +41,6 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 		return nil, err
 	}
 
-	if req.URL.Scheme == "" {
-		req.URL.Scheme = "http"
-	}
-
 	for key, value := range in.Header {
 		req.Header.Set(key, value)
 	}
