@@ -107,8 +107,9 @@ func ToRun(totest *libgosiege.Requests, randomUrl bool, shutdownChannel chan boo
 			} else {
 
 				defer r.Body.Close()
-				//				response_body, _ := ioutil.ReadAll(r.Body)
-				//				fmt.Println(response_body)
+
+				// TODO: here we'll put goroutine to manage result data
+
 				path := "/"
 				if req.ReadyUrl.URL.Path != "" {
 					path = req.ReadyUrl.URL.Path
