@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"bitbucket.org/tux-eithel/gosiege/parseUrl"
+	"bitbucket.org/tux-eithel/gosiege/lib"
 )
 
 // -n param
