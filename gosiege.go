@@ -58,14 +58,12 @@ func main() {
 
 	shutdownChannel := make(chan bool)
 
-	nextChannel := make(chan int, 1)
-
 	waitGroup := &sync.WaitGroup{}
 
 	waitGroup.Add(1)
 
 	for i := 0; i < numberConcurrent; i++ {
-		go ToRun(listUrls.Req, randomUrl, nextChannel, shutdownChannel, waitGroup)
+		go ToRun(listUrls.Req, randomUrl, shutdownChannel, waitGroup)
 	}
 
 	<-quitChannel
@@ -77,7 +75,7 @@ func main() {
 	fmt.Println("Done.")
 }
 
-func ToRun(totest *libgosiege.Requests, randomUrl bool, nextChannel chan int, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
+func ToRun(totest *libgosiege.Requests, randomUrl bool, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
 
 	defer waitGroup.Done()
 	for {
