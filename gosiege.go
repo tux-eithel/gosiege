@@ -53,10 +53,6 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	//	fmt.Println(numberConcurrent)
-	//	fmt.Println(secToWait)
-	//	fmt.Println(listUrls.String())
-
 	quitChannel := make(chan os.Signal)
 	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
 
@@ -80,9 +76,7 @@ func main() {
 	shutdownChannel <- true
 	fmt.Println("Received quit. Sending shutdown and waiting on goroutines...")
 
-	/*
-	 * Block until wait group counter gets to zero
-	 */
+	// Block until wait group counter gets to zero
 	waitGroup.Wait()
 	fmt.Println("Done.")
 }
