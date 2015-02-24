@@ -5,14 +5,18 @@ import (
 	"strings"
 )
 
+// Type FlagUrl re-define Requests struct to implement flag.Value interface
+// so you can use a FlagUrl struct to parse directly cli param
 type FlagUrl struct {
 	Req *Requests
 }
 
+// Init initialize the struct
 func (fu *FlagUrl) Init() {
 	fu.Req = NewRequests()
 }
 
+// String return all url parsed in one single string
 func (fu *FlagUrl) String() string {
 	var srt []string
 	for i := 0; i < len(fu.Req.Reqs); i++ {
@@ -21,6 +25,8 @@ func (fu *FlagUrl) String() string {
 	return strings.Join(srt, ",")
 }
 
+// When it parse an url, it will be added to a Requests struct.
+// If url gives error, url will be skipped
 func (fu *FlagUrl) Set(srt string) error {
 	fu.Req = NewRequests()
 	app := strings.Split(srt, " ")
