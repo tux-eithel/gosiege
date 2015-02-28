@@ -1,5 +1,4 @@
 Some thoughts about the project:
 
- * create a goroutine for handling the response data:
-	data as url, time and qta byte, will be pass as a struct to a goroutine using a buffered channel.
-	This goroutine has the task to print data, update global data and when program will shut-down print the results data
+ * new flag to parse header response. this flag allows user to pass a regex for parse header. 
+	every flag, creates a new bucket where data will be filtered
