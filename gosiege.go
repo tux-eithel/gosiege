@@ -93,7 +93,7 @@ func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCount
 
 		if req == nil {
 
-			fmt.Println("Seems strage, no Url recover")
+			fmt.Println("Seems strange, no Url recover")
 
 		} else {
 
