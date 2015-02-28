@@ -58,18 +58,20 @@ func main() {
 	quitChannel := make(chan os.Signal)
 	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
 
-	shutdownChannel := make(chan bool)
+	shutdownChannel := make(chan bool, numberConcurrent)
 
 	waitGroup := &sync.WaitGroup{}
 
-	waitGroup.Add(1)
+	waitGroup.Add(numberConcurrent)
 
 	for i := 0; i < numberConcurrent; i++ {
 		go ToRun(listUrls.Req, dataChannel, randomUrl, shutdownChannel, waitGroup)
 	}
 
 	<-quitChannel
-	shutdownChannel <- true
+	for i := 0; i < numberConcurrent; i++ {
+		shutdownChannel <- true
+	}
 	fmt.Println("Received quit. Sending shutdown and waiting on goroutines...")
 
 	// Block until wait group counter gets to zero
