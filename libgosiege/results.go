@@ -56,3 +56,44 @@ func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path stri
 		app_path,
 	}
 }
+
+func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool) error {
+
+	var safe_update = make(chan int, 1)
+	safe_update <- 1
+
+	sumData := &GeneralCounter{}
+
+	for {
+
+		select {
+		case data := <-dataChannel:
+
+			<-safe_update
+			fmt.Println(data.StatusCode, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
+			// sum request
+			sumData.NumRequest++
+			// if status code <400 it's a success request
+			if data.StatusCode < 400 {
+				sumData.NumSuccess++
+			}
+			// save the short request
+			if sumData.ShortTrans == 0 || sumData.ShortTrans > data.Elapsed {
+				sumData.ShortTrans = data.Elapsed
+			}
+			// save the long request
+			if sumData.LongTrans == 0 || sumData.LongTrans < data.Elapsed {
+				sumData.LongTrans = data.Elapsed
+			}
+			// sum the total time
+			sumData.TotalTime += data.Elapsed
+			safe_update <- 1
+
+		case _ = <-shutdownChannel:
+			fmt.Printf("%+v\n", sumData)
+			return nil
+
+		default:
+		}
+	}
+}
