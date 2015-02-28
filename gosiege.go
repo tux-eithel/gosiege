@@ -59,10 +59,13 @@ func main() {
 	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
 
 	shutdownChannel := make(chan bool, numberConcurrent)
+	shutdownProcessData := make(chan bool)
 
 	waitGroup := &sync.WaitGroup{}
 
 	waitGroup.Add(numberConcurrent)
+
+	go libgosiege.ProcessData(dataChannel, shutdownProcessData)
 
 	for i := 0; i < numberConcurrent; i++ {
 		go ToRun(listUrls.Req, dataChannel, randomUrl, shutdownChannel, waitGroup)
@@ -77,6 +80,7 @@ func main() {
 	// Block until wait group counter gets to zero
 	waitGroup.Wait()
 	fmt.Println("Done.")
+	shutdownProcessData <- true
 }
 
 func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCounter, randomUrl bool, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
