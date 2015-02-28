@@ -85,6 +85,8 @@ func main() {
 
 func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCounter, randomUrl bool, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
 
+	var t0 time.Time
+	var diff time.Duration
 	defer waitGroup.Done()
 	for {
 
@@ -103,9 +105,9 @@ func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCount
 
 		} else {
 
-			t0 := time.Now()
+			t0 = time.Now()
 			r, err := http.DefaultClient.Do(req.ReadyUrl)
-			diff := time.Since(t0)
+			diff = time.Since(t0)
 
 			if err != nil {
 
