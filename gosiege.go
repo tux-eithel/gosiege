@@ -53,6 +53,8 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
+	waitData := &sync.WaitGroup{}
+	waitData.Add(1)
 	dataChannel := make(chan *libgosiege.SimpleCounter, numberConcurrent*2)
 
 	quitChannel := make(chan os.Signal)
@@ -62,10 +64,9 @@ func main() {
 	shutdownProcessData := make(chan bool)
 
 	waitGroup := &sync.WaitGroup{}
-
 	waitGroup.Add(numberConcurrent)
 
-	go libgosiege.ProcessData(dataChannel, shutdownProcessData)
+	go libgosiege.ProcessData(dataChannel, shutdownProcessData, waitData)
 
 	for i := 0; i < numberConcurrent; i++ {
 		go ToRun(listUrls.Req, dataChannel, randomUrl, shutdownChannel, waitGroup)
@@ -79,8 +80,10 @@ func main() {
 
 	// Block until wait group counter gets to zero
 	waitGroup.Wait()
-	fmt.Println("Done.")
+
 	shutdownProcessData <- true
+	waitData.Wait()
+	fmt.Println("Done.")
 }
 
 func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCounter, randomUrl bool, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {

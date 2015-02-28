@@ -2,6 +2,7 @@ package libgosiege
 
 import (
 	"fmt"
+	"sync"
 	_ "time"
 )
 
@@ -57,12 +58,14 @@ func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path stri
 	}
 }
 
-func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool) error {
+func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
 
 	var safe_update = make(chan int, 1)
 	safe_update <- 1
 
 	sumData := &GeneralCounter{}
+
+	defer waitGroup.Done()
 
 	for {
 
