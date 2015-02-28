@@ -50,6 +50,7 @@ func main() {
 	flag.Parse()
 
 	if isNasty {
+		fmt.Println("We are going to use", runtime.NumCPU(), "CPU")
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
