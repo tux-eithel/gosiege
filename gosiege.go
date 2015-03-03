@@ -69,6 +69,7 @@ func main() {
 
 	go libgosiege.ProcessData(dataChannel, shutdownProcessData, waitData)
 
+	fmt.Println("Prepare ", numberConcurrent, " goroutines for the battle")
 	for i := 0; i < numberConcurrent; i++ {
 		go ToRun(listUrls.Req, dataChannel, randomUrl, shutdownChannel, waitGroup)
 	}
