@@ -91,6 +91,10 @@ func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCount
 
 	var t0 time.Time
 	var diff time.Duration
+	var r *http.Response
+	var err error
+	var body []byte
+
 	defer waitGroup.Done()
 	for {
 
@@ -110,7 +114,7 @@ func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCount
 		} else {
 
 			t0 = time.Now()
-			r, err := http.DefaultClient.Do(req.ReadyUrl)
+			r, err = http.DefaultClient.Do(req.ReadyUrl)
 			diff = time.Since(t0)
 
 			if err != nil {
@@ -120,13 +124,12 @@ func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCount
 
 			} else {
 
-				defer r.Body.Close()
-
-				body, err := ioutil.ReadAll(r.Body)
+				body, err = ioutil.ReadAll(r.Body)
 				qtaBody := -1
 				if err == nil {
 					qtaBody = len(body)
 				}
+				r.Body.Close()
 
 				// TODO: here we'll put goroutine to manage result data
 
