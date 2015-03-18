@@ -71,7 +71,7 @@ func main() {
 
 	fmt.Println("Prepare ", numberConcurrent, " goroutines for the battle")
 	for i := 0; i < numberConcurrent; i++ {
-		go ToRun(listUrls.Req, dataChannel, randomUrl, shutdownChannel, waitGroup)
+		go ToRun(listUrls.Req, dataChannel, randomUrl, secToWait, shutdownChannel, waitGroup)
 	}
 
 	<-quitChannel
