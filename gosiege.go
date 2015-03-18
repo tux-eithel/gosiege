@@ -87,7 +87,13 @@ func main() {
 	fmt.Println("Done.")
 }
 
-func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCounter, randomUrl bool, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
+func ToRun(
+	totest *libgosiege.Requests,
+	dataChannel chan *libgosiege.SimpleCounter,
+	randomUrl bool,
+	secToWait time.Duration,
+	shutdownChannel chan bool,
+	waitGroup *sync.WaitGroup) error {
 
 	var t0 time.Time
 	var diff time.Duration
