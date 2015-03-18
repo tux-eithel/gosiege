@@ -139,7 +139,7 @@ func ToRun(totest *libgosiege.Requests, dataChannel chan *libgosiege.SimpleCount
 
 		}
 
-		// do Stuff
+		// wait the next call
 		time.Sleep(secToWait)
 
 	}
