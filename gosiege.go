@@ -76,7 +76,7 @@ func main() {
 
 	<-quitChannel
 
-	fmt.Println("Received quit. Sending shutdown and waiting on goroutines...")
+	fmt.Println("Received quit. Sending shutdown and waiting all goroutines...")
 	close(shutdownChannel)
 
 	// Block until wait group counter gets to zero
