@@ -126,7 +126,6 @@ func ToRun(
 			if err != nil {
 
 				fmt.Printf("Response Error: %v | Response Object:  %+v\n", err, r)
-				// return body, statusCode, response_headers, err
 
 			} else {
 
