@@ -58,9 +58,12 @@ func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path stri
 	}
 }
 
-func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool, waitGroup *sync.WaitGroup) {
+func ProcessData(dataChannel chan *SimpleCounter, waitGroup *sync.WaitGroup) {
 
 	var safe_update = make(chan int, 1)
+	var ok bool
+	var data *SimpleCounter
+
 	safe_update <- 1
 
 	sumData := &GeneralCounter{}
@@ -70,7 +73,12 @@ func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool, wai
 	for {
 
 		select {
-		case data := <-dataChannel:
+		case data, ok = <-dataChannel:
+
+			if !ok {
+				fmt.Printf("%+v\n", sumData)
+				return
+			}
 
 			<-safe_update
 			fmt.Println(data.StatusCode, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
@@ -91,10 +99,6 @@ func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool, wai
 			// sum the total time
 			sumData.TotalTime += data.Elapsed
 			safe_update <- 1
-
-		case _ = <-shutdownChannel:
-			fmt.Printf("%+v\n", sumData)
-			return
 
 		default:
 		}
