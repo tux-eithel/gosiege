@@ -106,46 +106,47 @@ func ToRun(
 
 		select {
 		case _ = <-shutdownChannel:
+			// fmt.Println("Routine closed")
 			return
 
 		default:
-		}
 
-		req := totest.NextUri(randomUrl)
+			req := totest.NextUri(randomUrl)
 
-		if req == nil {
+			if req == nil {
 
-			fmt.Println("Seems strange, no Url recover")
-
-		} else {
-
-			t0 = time.Now()
-			r, err = http.DefaultClient.Do(req.ReadyUrl)
-			diff = time.Since(t0)
-
-			if err != nil {
-
-				fmt.Printf("Response Error: %v | Response Object:  %+v\n", err, r)
+				fmt.Println("Seems strange, no Url recover")
 
 			} else {
 
-				body, err = ioutil.ReadAll(r.Body)
-				qtaBody := -1
-				if err == nil {
-					qtaBody = len(body)
+				t0 = time.Now()
+				r, err = http.DefaultClient.Do(req.ReadyUrl)
+				diff = time.Since(t0)
+
+				if err != nil {
+
+					fmt.Printf("Response Error: %v | Response Object:  %+v\n", err, r)
+
+				} else {
+
+					body, err = ioutil.ReadAll(r.Body)
+					qtaBody := -1
+					if err == nil {
+						qtaBody = len(body)
+					}
+					r.Body.Close()
+
+					// TODO: here we'll put goroutine to manage result data
+
+					dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, req.ReadyUrl.URL.Path)
+
 				}
-				r.Body.Close()
-
-				// TODO: here we'll put goroutine to manage result data
-
-				dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, req.ReadyUrl.URL.Path)
 
 			}
 
+			// wait the next call
+			time.Sleep(secToWait)
 		}
-
-		// wait the next call
-		time.Sleep(secToWait)
 
 	}
 
