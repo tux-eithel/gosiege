@@ -58,7 +58,7 @@ func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path stri
 	}
 }
 
-func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool, waitGroup *sync.WaitGroup) error {
+func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool, waitGroup *sync.WaitGroup) {
 
 	var safe_update = make(chan int, 1)
 	safe_update <- 1
@@ -94,7 +94,7 @@ func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool, wai
 
 		case _ = <-shutdownChannel:
 			fmt.Printf("%+v\n", sumData)
-			return nil
+			return
 
 		default:
 		}
