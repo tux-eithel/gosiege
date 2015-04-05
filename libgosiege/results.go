@@ -80,11 +80,11 @@ func ProcessData(dataChannel chan *SimpleCounter, shutdownChannel chan bool, wai
 			if data.StatusCode < 400 {
 				sumData.NumSuccess++
 			}
-			// save the short request
+			// save the shortest request
 			if sumData.ShortTrans == 0 || sumData.ShortTrans > data.Elapsed {
 				sumData.ShortTrans = data.Elapsed
 			}
-			// save the long request
+			// save the longest request
 			if sumData.LongTrans == 0 || sumData.LongTrans < data.Elapsed {
 				sumData.LongTrans = data.Elapsed
 			}
