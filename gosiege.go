@@ -62,12 +62,11 @@ func main() {
 	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
 
 	shutdownChannel := make(chan bool)
-	shutdownProcessData := make(chan bool)
 
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(numberConcurrent)
 
-	go libgosiege.ProcessData(dataChannel, shutdownProcessData, waitData)
+	go libgosiege.ProcessData(dataChannel, waitData)
 
 	fmt.Println("Prepare ", numberConcurrent, " goroutines for the battle")
 	for i := 0; i < numberConcurrent; i++ {
@@ -82,7 +81,8 @@ func main() {
 	// Block until wait group counter gets to zero
 	waitGroup.Wait()
 
-	shutdownProcessData <- true
+	close(dataChannel)
+
 	waitData.Wait()
 	fmt.Println("Done.")
 }
