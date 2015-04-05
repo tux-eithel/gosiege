@@ -93,7 +93,7 @@ func ToRun(
 	randomUrl bool,
 	secToWait time.Duration,
 	shutdownChannel chan bool,
-	waitGroup *sync.WaitGroup) error {
+	waitGroup *sync.WaitGroup) {
 
 	var t0 time.Time
 	var diff time.Duration
@@ -106,7 +106,7 @@ func ToRun(
 
 		select {
 		case _ = <-shutdownChannel:
-			return nil
+			return
 
 		default:
 		}
@@ -149,5 +149,5 @@ func ToRun(
 
 	}
 
-	return nil
+	return
 }
