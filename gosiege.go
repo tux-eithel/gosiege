@@ -61,7 +61,7 @@ func main() {
 	quitChannel := make(chan os.Signal)
 	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
 
-	shutdownChannel := make(chan bool, numberConcurrent)
+	shutdownChannel := make(chan bool)
 	shutdownProcessData := make(chan bool)
 
 	waitGroup := &sync.WaitGroup{}
