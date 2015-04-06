@@ -18,7 +18,7 @@ import (
 	"bitbucket.org/tux-eithel/gosiege/libgosiege"
 )
 
-// -n param
+// -c param
 var numberConcurrent int
 
 // -s param
@@ -33,18 +33,28 @@ var inputFile string
 // -nasty param
 var isNasty bool
 
-// r param
+// rand param
 var randomUrl bool
+
+// exp param
+var listRegexp libgosiege.FlagRegexp
+
+// pexp param
+var printRegexp bool
 
 func init() {
 
 	listUrls.Init()
-	flag.IntVar(&numberConcurrent, "n", 1, "Number of concurrent request")
+	listRegexp.Init()
+
+	flag.IntVar(&numberConcurrent, "c", 1, "Number of concurrent request")
 	flag.DurationVar(&secToWait, "s", time.Duration(1)*time.Second, "Time to wait until next request")
 	flag.Var(&listUrls, "u", "Url(s) to test")
 	flag.StringVar(&inputFile, "f", "", "Input file with urls")
 	flag.BoolVar(&isNasty, "nasty", false, "Use all available CPU cores")
-	flag.BoolVar(&randomUrl, "r", true, "Use random urls from list")
+	flag.BoolVar(&randomUrl, "rand", true, "Use random urls from list")
+	flag.Var(&listRegexp, "exp", "Regular expression for filter response header")
+	flag.BoolVar(&printRegexp, "pexp", false, "Print result flag during execution")
 }
 
 func main() {
@@ -54,6 +64,8 @@ func main() {
 		fmt.Println("We are going to use", runtime.NumCPU(), "CPU")
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
+
+	listRegexp.Rexp.PrintRegexp = printRegexp
 
 	waitData := &sync.WaitGroup{}
 	waitData.Add(1)
@@ -67,7 +79,7 @@ func main() {
 	waitGroup := &sync.WaitGroup{}
 	waitGroup.Add(numberConcurrent)
 
-	go libgosiege.ProcessData(dataChannel, waitData)
+	go libgosiege.ProcessData(dataChannel, listRegexp.Rexp, waitData)
 
 	fmt.Println("Prepare ", numberConcurrent, " goroutines for the battle")
 	for i := 0; i < numberConcurrent; i++ {
@@ -145,7 +157,7 @@ func ToRun(
 					}
 					r.Body.Close()
 
-					dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, rq.URL.Path)
+					dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, rq.URL.Path, r.Header)
 
 				}
 
