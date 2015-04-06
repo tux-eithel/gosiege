@@ -36,6 +36,7 @@ type GeneralCounter struct {
 	LongTrans  float64
 	ShortTrans float64
 	TotalTime  float64
+	TotalByte  float64
 }
 
 func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
@@ -46,6 +47,7 @@ func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
 	fmt.Printf("Response time: %.2fs\n", gc.TotalTime/float64(gc.NumRequest))
 	fmt.Printf("Longest transaction: %.2fs\n", gc.LongTrans)
 	fmt.Printf("Shortest transaction: %.2fs\n", gc.ShortTrans)
+	fmt.Println("Average bytes for transaction ", ByteSize(gc.TotalByte/float64(gc.NumRequest)))
 
 	for _, value := range parseHeader.list {
 		fmt.Printf("\n\n")
@@ -185,6 +187,9 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 
 			// sum request
 			sumData.NumRequest++
+
+			// qta bytes
+			sumData.TotalByte += data.QtaBytes
 
 			// if status code <400 it's a success request
 			if data.StatusCode < 400 {
