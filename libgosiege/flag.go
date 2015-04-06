@@ -34,8 +34,7 @@ func (fu *FlagUrl) Set(srt string) error {
 
 		appR, err := NewInputRequest(value)
 		if err != nil {
-			fmt.Println("Error making Request for '", value, "' with error:", err)
-			fmt.Println("Url ignored")
+			fmt.Println("Url ignored '", value, "' with error:", err)
 		} else {
 			fu.Req.AddRequest(appR)
 		}
