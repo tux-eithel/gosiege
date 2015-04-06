@@ -1,1 +1,1 @@
-# SIEGE, the http/https stress tester made in GO
+# GOSIEGE, the http/https stress tester made in GO
