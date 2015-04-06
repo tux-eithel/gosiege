@@ -2,6 +2,8 @@ package libgosiege
 
 import (
 	"fmt"
+	"net/http"
+	"regexp"
 	"sync"
 	_ "time"
 )
@@ -36,14 +38,101 @@ type GeneralCounter struct {
 	TotalTime  float64
 }
 
+type CompareHeader struct {
+	list        map[string]*FilterHeader
+	PrintRegexp bool
+}
+
+func NewCompareHeader() *CompareHeader {
+	return &CompareHeader{
+		make(map[string]*FilterHeader),
+		false,
+	}
+}
+
+func (ch *CompareHeader) Add(key, value string) {
+
+	if r, err := regexp.Compile(value); err != nil {
+		fmt.Printf("Unable to compile '%s' in a regular expression, skipped\n", value)
+	} else {
+		ch.list[key] = &FilterHeader{
+			Key:     key,
+			Value:   value,
+			ContTot: 0,
+			ContHit: 0,
+			Rexp:    r,
+		}
+	}
+
+}
+
+func (ch *CompareHeader) CompareAll(header http.Header) {
+
+	for _, val := range ch.list {
+		val.Compare(header, ch.PrintRegexp)
+	}
+
+}
+
+func (ch *CompareHeader) Finish() {
+
+	for _, value := range ch.list {
+		fmt.Println(value)
+	}
+
+}
+
+func (ch *CompareHeader) String() string {
+
+	app := ""
+	for key, value := range ch.list {
+		app += fmt.Sprintf("%s: %s\n", key, value)
+	}
+	return app
+
+}
+
+type FilterHeader struct {
+	Key     string
+	Value   string
+	ContTot int
+	ContHit int
+	Rexp    *regexp.Regexp
+	sync.Mutex
+}
+
+func (fh *FilterHeader) Compare(header http.Header, printRegexp bool) {
+
+	value := header.Get(fh.Key)
+
+	if value == "" {
+		return
+	}
+
+	fh.Lock()
+	defer fh.Unlock()
+
+	if printRegexp {
+		fmt.Printf("\t%s: '%s'\n", fh.Key, value)
+	}
+
+	fh.ContTot++
+
+	if fh.Rexp.Match([]byte(value)) {
+		fh.ContHit++
+	}
+
+}
+
 type SimpleCounter struct {
 	QtaBytes   float64
 	Elapsed    float64
 	StatusCode int
 	Path       string
+	Header     http.Header
 }
 
-func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path string) *SimpleCounter {
+func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path string, header http.Header) *SimpleCounter {
 
 	app_path := "/"
 	if path != "" {
@@ -55,10 +144,11 @@ func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path stri
 		elapsedTime,
 		code,
 		app_path,
+		header,
 	}
 }
 
-func ProcessData(dataChannel chan *SimpleCounter, waitGroup *sync.WaitGroup) {
+func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *sync.WaitGroup) {
 
 	var ok bool
 	var data *SimpleCounter
@@ -73,11 +163,14 @@ func ProcessData(dataChannel chan *SimpleCounter, waitGroup *sync.WaitGroup) {
 		case data, ok = <-dataChannel:
 
 			if !ok {
+				HC.Finish()
 				fmt.Printf("%+v\n", sumData)
 				return
 			}
 
 			fmt.Println(data.StatusCode, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
+			HC.CompareAll(data.Header)
+
 			// sum request
 			sumData.NumRequest++
 
