@@ -75,13 +75,10 @@ func main() {
 	}
 
 	<-quitChannel
-
 	fmt.Println("Received quit. Sending shutdown and waiting all goroutines...")
 	close(shutdownChannel)
 
-	// Block until wait group counter gets to zero
 	waitGroup.Wait()
-
 	close(dataChannel)
 
 	waitData.Wait()
@@ -147,8 +144,6 @@ func ToRun(
 						qtaBody = len(body)
 					}
 					r.Body.Close()
-
-					// TODO: here we'll put goroutine to manage result data
 
 					dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, rq.URL.Path)
 
