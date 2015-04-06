@@ -1,6 +1,7 @@
 package libgosiege
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -18,11 +19,13 @@ func (fu *FlagUrl) Init() {
 
 // String return all url parsed in one single string
 func (fu *FlagUrl) String() string {
+
 	var srt []string
 	for i := 0; i < len(fu.Req.Reqs); i++ {
 		srt = append(srt, fu.Req.Reqs[i].Url)
 	}
 	return strings.Join(srt, ",")
+
 }
 
 // When it parse an url, it will be added to a Requests struct.
@@ -41,4 +44,30 @@ func (fu *FlagUrl) Set(srt string) error {
 
 	}
 	return nil
+
+}
+
+type FlagRegexp struct {
+	Rexp *CompareHeader
+}
+
+func (fr *FlagRegexp) Init() {
+	fr.Rexp = NewCompareHeader()
+}
+
+func (fr *FlagRegexp) String() string {
+	return fr.Rexp.String()
+}
+
+func (fr *FlagRegexp) Set(srt string) error {
+
+	app := strings.Split(srt, " ")
+	if len(app) != 2 {
+		return errors.New("Indicate header key and regex separated from space")
+	}
+
+	fr.Rexp.Add(app[0], app[1])
+
+	return nil
+
 }
