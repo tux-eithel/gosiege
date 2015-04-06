@@ -45,10 +45,10 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 // Its structure also contains the current-1 object to extract in case of sequential reading,
 // or an object for random number generation in case of random reading
 type Requests struct {
-	Reqs  []*InputRequest
-	Rand  *rand.Rand
-	Cont  int
-	Block sync.Mutex
+	Reqs []*InputRequest
+	Rand *rand.Rand
+	Cont int
+	sync.Mutex
 }
 
 // NewRequests inizialize a Requests object
@@ -80,8 +80,8 @@ func (r *Requests) NextUri(isRandom bool) *InputRequest {
 		return r.Reqs[0]
 	}
 
-	r.Block.Lock()
-	defer r.Block.Unlock()
+	r.Lock()
+	defer r.Unlock()
 
 	if isRandom {
 		return r.Reqs[r.Rand.Intn(len(r.Reqs))]
