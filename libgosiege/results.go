@@ -38,6 +38,25 @@ type GeneralCounter struct {
 	TotalTime  float64
 }
 
+func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
+	fmt.Printf("\n\n")
+	fmt.Println("Transactions:", gc.NumRequest, "hits")
+	fmt.Println("Successful transactions: ", gc.NumSuccess)
+	fmt.Println("Failed transactions: ", gc.NumRequest-gc.NumSuccess)
+	fmt.Printf("Response time: %.2fs\n", gc.TotalTime/float64(gc.NumRequest))
+	fmt.Printf("Longest transaction: %.2fs\n", gc.LongTrans)
+	fmt.Printf("Shortest transaction: %.2fs\n", gc.ShortTrans)
+
+	for _, value := range parseHeader.list {
+		fmt.Printf("\n\n")
+		fmt.Printf("Header %s: '%s'\n", value.Key, value.Value)
+		fmt.Println("Transactions with this header: ", value.ContTot)
+		fmt.Printf("Was present in %.1f%% of total transactions\n", float64(value.ContTot)*100/float64(gc.NumSuccess))
+		fmt.Printf("Match the regexp %.1f%% transactions\n", float64(value.ContHit)*100/float64(value.ContTot))
+
+	}
+}
+
 type CompareHeader struct {
 	list        map[string]*FilterHeader
 	PrintRegexp bool
@@ -70,14 +89,6 @@ func (ch *CompareHeader) CompareAll(header http.Header) {
 
 	for _, val := range ch.list {
 		val.Compare(header, ch.PrintRegexp)
-	}
-
-}
-
-func (ch *CompareHeader) Finish() {
-
-	for _, value := range ch.list {
-		fmt.Println(value)
 	}
 
 }
@@ -163,9 +174,10 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 		case data, ok = <-dataChannel:
 
 			if !ok {
-				HC.Finish()
-				fmt.Printf("%+v\n", sumData)
+
+				sumData.Results(HC)
 				return
+
 			}
 
 			fmt.Println(data.StatusCode, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
