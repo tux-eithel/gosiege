@@ -28,7 +28,7 @@ func (fu *FlagUrl) String() string {
 // When it parse an url, it will be added to a Requests struct.
 // If url gives error, url will be skipped
 func (fu *FlagUrl) Set(srt string) error {
-	fu.Req = NewRequests()
+
 	app := strings.Split(srt, " ")
 	for _, value := range app {
 
