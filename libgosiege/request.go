@@ -68,8 +68,7 @@ func (r *Requests) AddRequest(ir *InputRequest) {
 
 // NextUri return the next uri to be processed. If isRandom is true, a random url from input is returned, else the next one in order.
 // Pass isRandom as false value is useful if you want to process all the input urls
-// Now NextUri is thread-safe when isRandom is false. Well is thread-safe the sum of index for next element, but not the result of the function!
-// For that, you have to make thread-safe this function when you are going to call it. But if you really want this it's better run gosiege with -n 1 param
+// Now NextUri is thread-safe
 func (r *Requests) NextUri(isRandom bool) *InputRequest {
 
 	if len(r.Reqs) == 0 {
