@@ -1,4 +1,4 @@
 Some thoughts about the project:
 
- * new flag to parse header response. this flag allows user to pass a regex for parse header. 
-	every flag, creates a new bucket where data will be filtered
+ * parse input file
+ * some colors!
