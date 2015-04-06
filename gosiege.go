@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -98,6 +99,7 @@ func ToRun(
 	var t0 time.Time
 	var diff time.Duration
 	var r *http.Response
+	var rq *http.Request
 	var err error
 	var body []byte
 
@@ -119,8 +121,18 @@ func ToRun(
 
 			} else {
 
+				// fmt.Println("URL: ", req.Url)
+
+				rq, err = http.NewRequest(req.Method, req.Url, bytes.NewBuffer(req.Body))
+				if err != nil {
+					fmt.Println("Error preparing url: ", req.Url)
+				}
+				for key, value := range req.Header {
+					rq.Header.Set(key, value)
+				}
+
 				t0 = time.Now()
-				r, err = http.DefaultClient.Do(req.ReadyUrl)
+				r, err = http.DefaultClient.Do(rq)
 				diff = time.Since(t0)
 
 				if err != nil {
@@ -138,7 +150,7 @@ func ToRun(
 
 					// TODO: here we'll put goroutine to manage result data
 
-					dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, req.ReadyUrl.URL.Path)
+					dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, rq.URL.Path)
 
 				}
 

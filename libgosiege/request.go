@@ -1,22 +1,19 @@
 package libgosiege
 
 import (
-	"bytes"
-	_ "fmt"
 	"math/rand"
-	"net/http"
 	"net/url"
+	"sync"
 	"time"
 )
 
 // InputRequest represents a parsed url from cli or file
 type InputRequest struct {
-	Method   string
-	Url      string
-	Header   map[string]string
-	Body     []byte
-	Param    map[string]string
-	ReadyUrl *http.Request
+	Method string
+	Url    string
+	Header map[string]string
+	Body   []byte
+	Param  map[string]string
 }
 
 // NewInputRequest creates a new InputRequest from a url string.
@@ -40,17 +37,6 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 		Method: "GET",
 		Url:    inputUrl,
 	}
-
-	req, err := http.NewRequest(in.Method, in.Url, bytes.NewBuffer(in.Body))
-	if err != nil {
-		return nil, err
-	}
-
-	for key, value := range in.Header {
-		req.Header.Set(key, value)
-	}
-
-	in.ReadyUrl = req
 
 	return in, nil
 }
