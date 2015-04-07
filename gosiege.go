@@ -54,7 +54,7 @@ func init() {
 	flag.StringVar(&inputFile, "f", "", "Input file with urls")
 	flag.BoolVar(&isNasty, "nasty", false, "Use all available CPU cores")
 	flag.BoolVar(&randomUrl, "rand", true, "Use random urls from list")
-	flag.Var(&listRegexp, "exp", "Regular expression for filter response header")
+	flag.Var(&listRegexp, "exp", "Regular expression for filter response header. Ex. \"X-Cache HIT\"")
 	flag.BoolVar(&printRegexp, "pexp", false, "Print result flag during execution")
 }
 
