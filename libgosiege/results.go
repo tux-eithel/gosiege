@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"sync"
 	"time"
-	_ "time"
 )
 
+// Define some useful constants
 const (
 	_          = iota // ignore first value by assigning to blank identifier
 	KB float64 = 1 << (10 * iota)
@@ -17,6 +17,7 @@ const (
 	TB
 )
 
+// ByteSize formats a number into something human readable
 func ByteSize(b float64) string {
 	switch {
 	case b >= TB:
@@ -31,6 +32,7 @@ func ByteSize(b float64) string {
 	return fmt.Sprintf("%.2fB", b)
 }
 
+// GeneralCounter is a struct which keeps all global stats
 type GeneralCounter struct {
 	NumRequest  int
 	NumSuccess  int
@@ -43,12 +45,16 @@ type GeneralCounter struct {
 	TotalRun    time.Duration
 }
 
+// AddTrans add a transfer time to struct. It's not useful right now, but in future
+// you can use this points to make some graph
 func (gc *GeneralCounter) AddTrans(time float64) {
 
 	gc.TransTime = append(gc.TransTime, time)
 
 }
 
+// Results prints all the statistics collected
+// In future this may be handled better (template, refactoring, ..)
 func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
 
 	fmt.Printf("\n\n")
@@ -75,11 +81,13 @@ func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
 
 }
 
+// CompareHeader is a struct which keeps all the regexs received via CLI
 type CompareHeader struct {
 	list        map[string]*FilterHeader
 	PrintRegexp bool
 }
 
+// NewCompareHeader creates an empty CompareGeader struct
 func NewCompareHeader() *CompareHeader {
 	return &CompareHeader{
 		make(map[string]*FilterHeader),
@@ -87,6 +95,8 @@ func NewCompareHeader() *CompareHeader {
 	}
 }
 
+// Add adds a key and a value to struct. value must be a regexp.
+// If value doesn't compile into a regexp, this key-value will be skipped
 func (ch *CompareHeader) Add(key, value string) {
 
 	if r, err := regexp.Compile(value); err != nil {
@@ -103,6 +113,7 @@ func (ch *CompareHeader) Add(key, value string) {
 
 }
 
+// CompareAll tests all saved FilterHeader against an http.Header
 func (ch *CompareHeader) CompareAll(header http.Header) {
 
 	for _, val := range ch.list {
@@ -111,6 +122,8 @@ func (ch *CompareHeader) CompareAll(header http.Header) {
 
 }
 
+// String prints key-value (where value is a valid regexp). This method is useful
+// for FlagRegexp
 func (ch *CompareHeader) String() string {
 
 	app := ""
@@ -121,6 +134,9 @@ func (ch *CompareHeader) String() string {
 
 }
 
+// FilterHeader is a struct which keeps key, value (which will be compiled in regexp
+// and how many times key is present in the Header, and how may times regexp is
+// matched
 type FilterHeader struct {
 	Key     string
 	Value   string
@@ -130,6 +146,9 @@ type FilterHeader struct {
 	sync.Mutex
 }
 
+// Compare checks a regexp against an header
+// If printRegexp is true, the header value of key is printed.
+// The function is thread-safe
 func (fh *FilterHeader) Compare(header http.Header, printRegexp bool) {
 
 	value := header.Get(fh.Key)
@@ -153,6 +172,7 @@ func (fh *FilterHeader) Compare(header http.Header, printRegexp bool) {
 
 }
 
+// SimpleCounter keeps all statistics of a Response
 type SimpleCounter struct {
 	QtaBytes   float64
 	Elapsed    float64
@@ -162,23 +182,26 @@ type SimpleCounter struct {
 	Error      error
 }
 
+// NewSimpleCounter creates a new SimpleCounter
 func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path string, header http.Header) *SimpleCounter {
 
-	app_path := "/"
+	appPath := "/"
 	if path != "" {
-		app_path = path
+		appPath = path
 	}
 
 	return &SimpleCounter{
 		qtaBytes,
 		elapsedTime,
 		code,
-		app_path,
+		appPath,
 		header,
 		nil,
 	}
 }
 
+// ProcessData reads form dataChannel and update all the statistics
+// This function is NOT thread-safe. It's not a good idea call this function multiple times
 func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *sync.WaitGroup) {
 
 	var ok bool

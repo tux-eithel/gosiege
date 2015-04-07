@@ -98,6 +98,8 @@ func main() {
 	fmt.Println("Done.")
 }
 
+// ToRun is the function which do the dirty work :)
+// It creates a new http.NewRequest and makes the request
 func ToRun(
 	totest *libgosiege.Requests,
 	dataChannel chan *libgosiege.SimpleCounter,
