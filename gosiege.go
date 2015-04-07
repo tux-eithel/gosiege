@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -146,8 +147,9 @@ func ToRun(
 
 				if err != nil {
 
-					// TODO count as error!!
-					fmt.Printf("Response Error: %v | Response Object:  %+v\n", err, r)
+					dataChannel <- &libgosiege.SimpleCounter{
+						Error: errors.New("Response Error: " + err.Error()),
+					}
 
 				} else {
 

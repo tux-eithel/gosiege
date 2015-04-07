@@ -31,13 +31,14 @@ func ByteSize(b float64) string {
 }
 
 type GeneralCounter struct {
-	NumRequest int
-	NumSuccess int
-	LongTrans  float64
-	ShortTrans float64
-	TotalTime  float64
-	TotalByte  float64
-	TransTime  []float64
+	NumRequest  int
+	NumSuccess  int
+	NumBadError int
+	LongTrans   float64
+	ShortTrans  float64
+	TotalTime   float64
+	TotalByte   float64
+	TransTime   []float64
 }
 
 func (gc *GeneralCounter) AddTrans(time float64) {
@@ -50,12 +51,13 @@ func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
 
 	fmt.Printf("\n\n")
 	fmt.Println("Transactions:", gc.NumRequest, "hits")
-	fmt.Println("Successful transactions: ", gc.NumSuccess)
-	fmt.Println("Failed transactions: ", gc.NumRequest-gc.NumSuccess)
-	fmt.Printf("Response time: %.2fs\n", gc.TotalTime/float64(gc.NumRequest))
+	fmt.Printf("Availability: %.2f%%\n", 100-(float64(gc.NumBadError)*100/float64(gc.NumRequest)))
+	fmt.Println("Successful transactions:", gc.NumSuccess)
+	fmt.Println("Failed transactions:", gc.NumRequest-gc.NumSuccess)
+	fmt.Printf("Response time: %.2fs\n", gc.TotalTime/float64(gc.NumRequest-gc.NumBadError))
 	fmt.Printf("Longest transaction: %.2fs\n", gc.LongTrans)
 	fmt.Printf("Shortest transaction: %.2fs\n", gc.ShortTrans)
-	fmt.Println("Average bytes for transaction ", ByteSize(gc.TotalByte/float64(gc.NumRequest)))
+	fmt.Println("Average bytes for transaction: ", ByteSize(gc.TotalByte/float64(gc.NumRequest-gc.NumBadError)))
 
 	for _, value := range parseHeader.list {
 		fmt.Printf("\n\n")
@@ -152,6 +154,7 @@ type SimpleCounter struct {
 	StatusCode int
 	Path       string
 	Header     http.Header
+	Error      error
 }
 
 func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path string, header http.Header) *SimpleCounter {
@@ -167,6 +170,7 @@ func NewSimpleCounter(qtaBytes float64, elapsedTime float64, code int, path stri
 		code,
 		app_path,
 		header,
+		nil,
 	}
 }
 
@@ -191,33 +195,43 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 
 			}
 
-			fmt.Println(data.StatusCode, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
-			HC.CompareAll(data.Header)
-
 			// sum request
 			sumData.NumRequest++
 
-			// qta bytes
-			sumData.TotalByte += data.QtaBytes
+			if data.Error != nil {
 
-			sumData.AddTrans(data.Elapsed)
+				// sum bad error, socket, system limit
+				sumData.NumBadError++
+				fmt.Println(data.Error)
 
-			// if status code <400 it's a success request
-			if data.StatusCode < 400 {
-				sumData.NumSuccess++
+			} else {
+
+				fmt.Println(data.StatusCode, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
+				HC.CompareAll(data.Header)
+
+				// qta bytes
+				sumData.TotalByte += data.QtaBytes
+
+				sumData.AddTrans(data.Elapsed)
+
+				// if status code <400 it's a success request
+				if data.StatusCode < 400 {
+					sumData.NumSuccess++
+				}
+
+				// save the shortest request
+				if sumData.ShortTrans == 0 || sumData.ShortTrans > data.Elapsed {
+					sumData.ShortTrans = data.Elapsed
+				}
+
+				// save the longest request
+				if sumData.LongTrans == 0 || sumData.LongTrans < data.Elapsed {
+					sumData.LongTrans = data.Elapsed
+				}
+				// sum the total time
+				sumData.TotalTime += data.Elapsed
+
 			}
-
-			// save the shortest request
-			if sumData.ShortTrans == 0 || sumData.ShortTrans > data.Elapsed {
-				sumData.ShortTrans = data.Elapsed
-			}
-
-			// save the longest request
-			if sumData.LongTrans == 0 || sumData.LongTrans < data.Elapsed {
-				sumData.LongTrans = data.Elapsed
-			}
-			// sum the total time
-			sumData.TotalTime += data.Elapsed
 
 		default:
 		}
