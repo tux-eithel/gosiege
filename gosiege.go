@@ -146,6 +146,7 @@ func ToRun(
 
 				if err != nil {
 
+					// TODO count as error!!
 					fmt.Printf("Response Error: %v | Response Object:  %+v\n", err, r)
 
 				} else {
