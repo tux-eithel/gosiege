@@ -239,7 +239,7 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 
 				// sum bad error, socket, system limit
 				sumData.NumBadError++
-				fmt.Println(data.Error)
+				fmt.Println(color.Red(data.Error))
 
 			} else {
 
