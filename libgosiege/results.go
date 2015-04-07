@@ -2,8 +2,10 @@ package libgosiege
 
 import (
 	"fmt"
+	"github.com/labstack/gommon/color"
 	"net/http"
 	"regexp"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -160,14 +162,19 @@ func (fh *FilterHeader) Compare(header http.Header, printRegexp bool) {
 	fh.Lock()
 	defer fh.Unlock()
 
-	if printRegexp {
-		fmt.Printf("\t%s: '%s'\n", fh.Key, value)
-	}
-
 	fh.ContTot++
+
+	var colorValue string
 
 	if fh.Rexp.Match([]byte(value)) {
 		fh.ContHit++
+		colorValue = color.Green(value)
+	} else {
+		colorValue = color.Magenta(value)
+	}
+
+	if printRegexp {
+		fmt.Printf("\t%s: '%s'\n", fh.Key, colorValue)
 	}
 
 }
@@ -236,7 +243,19 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 
 			} else {
 
-				fmt.Println(data.StatusCode, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
+				var srtStatus string
+				switch {
+				case data.StatusCode >= 400 && 500 < data.StatusCode:
+					srtStatus = color.Yellow(data.StatusCode)
+
+				case data.StatusCode >= 500:
+					srtStatus = color.Red(data.StatusCode)
+
+				default:
+					srtStatus = strconv.Itoa(data.StatusCode)
+				}
+
+				fmt.Println(srtStatus, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
 				HC.CompareAll(data.Header)
 
 				// qta bytes
