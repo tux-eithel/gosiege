@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"regexp"
 	"sync"
+	"time"
 	_ "time"
 )
 
@@ -39,6 +40,7 @@ type GeneralCounter struct {
 	TotalTime   float64
 	TotalByte   float64
 	TransTime   []float64
+	TotalRun    time.Duration
 }
 
 func (gc *GeneralCounter) AddTrans(time float64) {
@@ -52,11 +54,14 @@ func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
 	fmt.Printf("\n\n")
 	fmt.Println("Transactions:", gc.NumRequest, "hits")
 	fmt.Printf("Availability: %.2f%%\n", 100-(float64(gc.NumBadError)*100/float64(gc.NumRequest)))
+	fmt.Println("Elapsed time:", gc.TotalRun.String())
+	fmt.Printf("Transaction rate: %.2f\n", float64(gc.NumSuccess)/gc.TotalRun.Seconds())
 	fmt.Println("Successful transactions:", gc.NumSuccess)
 	fmt.Println("Failed transactions:", gc.NumRequest-gc.NumSuccess)
 	fmt.Printf("Response time: %.2fs\n", gc.TotalTime/float64(gc.NumRequest-gc.NumBadError))
 	fmt.Printf("Longest transaction: %.2fs\n", gc.LongTrans)
 	fmt.Printf("Shortest transaction: %.2fs\n", gc.ShortTrans)
+	fmt.Println("Throughput:", ByteSize(gc.TotalByte/gc.TotalRun.Seconds()))
 	fmt.Println("Average bytes for transaction: ", ByteSize(gc.TotalByte/float64(gc.NumRequest-gc.NumBadError)))
 
 	for _, value := range parseHeader.list {
@@ -180,6 +185,7 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 	var data *SimpleCounter
 
 	sumData := &GeneralCounter{}
+	start := time.Now()
 
 	defer waitGroup.Done()
 
@@ -190,6 +196,7 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 
 			if !ok {
 
+				sumData.TotalRun = time.Since(start)
 				sumData.Results(HC)
 				return
 
