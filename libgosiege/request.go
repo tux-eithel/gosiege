@@ -1,7 +1,9 @@
 package libgosiege
 
 import (
+	"bytes"
 	"math/rand"
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -36,6 +38,11 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 	in := &InputRequest{
 		Method: "GET",
 		Url:    inputUrl,
+	}
+
+	_, err = http.NewRequest(in.Method, in.Url, bytes.NewBuffer(in.Body))
+	if err != nil {
+		return nil, err
 	}
 
 	return in, nil

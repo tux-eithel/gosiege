@@ -134,7 +134,7 @@ func ToRun(
 
 				rq, err = http.NewRequest(req.Method, req.Url, bytes.NewBuffer(req.Body))
 				if err != nil {
-					fmt.Println("Error preparing url: ", req.Url)
+					fmt.Println("Error preparing url, strange because it's already checked: ", req.Url)
 				}
 				for key, value := range req.Header {
 					rq.Header.Set(key, value)
