@@ -37,9 +37,17 @@ type GeneralCounter struct {
 	ShortTrans float64
 	TotalTime  float64
 	TotalByte  float64
+	TransTime  []float64
+}
+
+func (gc *GeneralCounter) AddTrans(time float64) {
+
+	gc.TransTime = append(gc.TransTime, time)
+
 }
 
 func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
+
 	fmt.Printf("\n\n")
 	fmt.Println("Transactions:", gc.NumRequest, "hits")
 	fmt.Println("Successful transactions: ", gc.NumSuccess)
@@ -57,6 +65,7 @@ func (gc *GeneralCounter) Results(parseHeader *CompareHeader) {
 		fmt.Printf("Match the regexp %.1f%% transactions\n", float64(value.ContHit)*100/float64(value.ContTot))
 
 	}
+
 }
 
 type CompareHeader struct {
@@ -190,6 +199,8 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 
 			// qta bytes
 			sumData.TotalByte += data.QtaBytes
+
+			sumData.AddTrans(data.Elapsed)
 
 			// if status code <400 it's a success request
 			if data.StatusCode < 400 {
