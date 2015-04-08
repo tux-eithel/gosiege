@@ -92,7 +92,7 @@ func main() {
 
 	fmt.Println("Prepare ", numberConcurrent, " goroutines for the battle")
 	for i := 0; i < numberConcurrent; i++ {
-		go ToRun(listUrls.Req, dataChannel, randomUrl, secToWait, shutdownChannel, waitGroup)
+		go ToRun(listUrls.Req, dataChannel, randomUrl, secToWait, shutdownChannel, quitChannel, waitGroup)
 	}
 
 	<-quitChannel
@@ -114,6 +114,7 @@ func ToRun(
 	randomUrl bool,
 	secToWait time.Duration,
 	shutdownChannel chan bool,
+	quitChannel chan os.Signal,
 	waitGroup *sync.WaitGroup) {
 
 	var t0 time.Time
@@ -136,43 +137,41 @@ func ToRun(
 			req := totest.NextUri(randomUrl)
 
 			if req == nil {
-
+				quitChannel <- syscall.SIGQUIT
 				return
+
+			}
+
+			// fmt.Println("URL: ", req.Url)
+
+			rq, err = http.NewRequest(req.Method, req.Url, bytes.NewBuffer(req.Body))
+			if err != nil {
+				fmt.Println("Error preparing url, strange because it's already checked: ", req.Url)
+			}
+			for key, value := range req.Header {
+				rq.Header.Set(key, value)
+			}
+
+			t0 = time.Now()
+			r, err = http.DefaultClient.Do(rq)
+			diff = time.Since(t0)
+
+			if err != nil {
+
+				dataChannel <- &libgosiege.SimpleCounter{
+					Error: errors.New("Response Error: " + err.Error()),
+				}
 
 			} else {
 
-				// fmt.Println("URL: ", req.Url)
-
-				rq, err = http.NewRequest(req.Method, req.Url, bytes.NewBuffer(req.Body))
-				if err != nil {
-					fmt.Println("Error preparing url, strange because it's already checked: ", req.Url)
+				body, err = ioutil.ReadAll(r.Body)
+				qtaBody := -1
+				if err == nil {
+					qtaBody = len(body)
 				}
-				for key, value := range req.Header {
-					rq.Header.Set(key, value)
-				}
+				r.Body.Close()
 
-				t0 = time.Now()
-				r, err = http.DefaultClient.Do(rq)
-				diff = time.Since(t0)
-
-				if err != nil {
-
-					dataChannel <- &libgosiege.SimpleCounter{
-						Error: errors.New("Response Error: " + err.Error()),
-					}
-
-				} else {
-
-					body, err = ioutil.ReadAll(r.Body)
-					qtaBody := -1
-					if err == nil {
-						qtaBody = len(body)
-					}
-					r.Body.Close()
-
-					dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, rq.URL.Path, r.Header)
-
-				}
+				dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, rq.URL.Path, r.Header)
 
 			}
 
