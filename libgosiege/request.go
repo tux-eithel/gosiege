@@ -40,11 +40,6 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 		Url:    inputUrl,
 	}
 
-	_, err = http.NewRequest(in.Method, in.Url, bytes.NewBuffer(in.Body))
-	if err != nil {
-		return nil, err
-	}
-
 	return in, nil
 }
 
