@@ -1,9 +1,8 @@
 package libgosiege
 
 import (
-	"bytes"
+	"fmt"
 	"math/rand"
-	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -16,6 +15,7 @@ type InputRequest struct {
 	Header map[string]string
 	Body   []byte
 	Param  map[string]string
+	Hit    int
 }
 
 // NewInputRequest creates a new InputRequest from a url string.
@@ -47,9 +47,10 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 // Its structure also contains the current-1 object to extract in case of sequential reading,
 // or an object for random number generation in case of random reading
 type Requests struct {
-	Reqs []*InputRequest
-	Rand *rand.Rand
-	Cont int
+	Reqs       []*InputRequest
+	Rand       *rand.Rand
+	Cont       int
+	MaxRequest int
 	sync.Mutex
 }
 
@@ -77,23 +78,41 @@ func (r *Requests) NextUri(isRandom bool) *InputRequest {
 		return nil
 	}
 
-	if len(r.Reqs) == 1 {
-		return r.Reqs[0]
-	}
-
 	r.Lock()
 	defer r.Unlock()
 
-	if isRandom {
-		return r.Reqs[r.Rand.Intn(len(r.Reqs))]
+	var index int
+
+	if len(r.Reqs) == 1 {
+		index = 0
+	} else {
+		if isRandom {
+			index = r.Rand.Intn(len(r.Reqs))
+		} else {
+
+			if r.Cont+1 >= len(r.Reqs) {
+				r.Cont = 0
+			} else {
+				r.Cont++
+			}
+			index = r.Cont
+		}
 	}
 
-	if r.Cont+1 == len(r.Reqs) {
-		r.Cont = 0
-	} else {
-		r.Cont++
+	r.Reqs[index].Hit++
+
+	oldObj := r.Reqs[index]
+
+	if r.MaxRequest > 0 && oldObj.Hit+1 > r.MaxRequest {
+
+		r.Reqs = append(r.Reqs[:index], r.Reqs[index+1:]...)
+
+		if len(r.Reqs) == 0 {
+			fmt.Println("All url hitted, pres ctrl+q to exit")
+		}
 	}
-	return r.Reqs[r.Cont]
+
+	return oldObj
 }
 
 // init set the Seed for random number
