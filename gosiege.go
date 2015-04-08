@@ -43,6 +43,9 @@ var listRegexp libgosiege.FlagRegexp
 // pexp param
 var printRegexp bool
 
+// per param
+var maxRequestForURL int
+
 func init() {
 
 	listUrls.Init()
@@ -56,6 +59,7 @@ func init() {
 	flag.BoolVar(&randomUrl, "rand", true, "Use random urls from list")
 	flag.Var(&listRegexp, "exp", "Regular expression for filter response header. Ex. \"X-Cache HIT\"")
 	flag.BoolVar(&printRegexp, "pexp", false, "Print result flag during execution")
+	flag.IntVar(&maxRequestForURL, "per", -1, "Number of time url will be hit")
 }
 
 func main() {
@@ -66,7 +70,11 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
+	// print regexp during execution
 	listRegexp.Rexp.PrintRegexp = printRegexp
+
+	// set number of totat hit for request
+	listUrls.Req.MaxRequest = maxRequestForURL
 
 	waitData := &sync.WaitGroup{}
 	waitData.Add(1)
@@ -129,7 +137,7 @@ func ToRun(
 
 			if req == nil {
 
-				fmt.Println("Seems strange, no Url recover")
+				return
 
 			} else {
 
