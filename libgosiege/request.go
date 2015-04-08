@@ -1,7 +1,6 @@
 package libgosiege
 
 import (
-	"fmt"
 	"math/rand"
 	"net/url"
 	"sync"
@@ -74,12 +73,12 @@ func (r *Requests) AddRequest(ir *InputRequest) {
 // Now NextUri is thread-safe
 func (r *Requests) NextUri(isRandom bool) *InputRequest {
 
+	r.Lock()
+	defer r.Unlock()
+
 	if len(r.Reqs) == 0 {
 		return nil
 	}
-
-	r.Lock()
-	defer r.Unlock()
 
 	var index int
 
@@ -107,9 +106,6 @@ func (r *Requests) NextUri(isRandom bool) *InputRequest {
 
 		r.Reqs = append(r.Reqs[:index], r.Reqs[index+1:]...)
 
-		if len(r.Reqs) == 0 {
-			fmt.Println("All url hitted, pres ctrl+q to exit")
-		}
 	}
 
 	return oldObj
