@@ -80,7 +80,7 @@ func main() {
 	waitData.Add(1)
 	dataChannel := make(chan *libgosiege.SimpleCounter, numberConcurrent*2)
 
-	quitChannel := make(chan os.Signal)
+	quitChannel := make(chan os.Signal, numberConcurrent)
 	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
 
 	shutdownChannel := make(chan bool)
