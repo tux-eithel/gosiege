@@ -70,6 +70,10 @@ func main() {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
+	if inputFile != "" {
+		libgosiege.ParseAllInputFile(inputFile, listUrls.Req)
+	}
+
 	// print regexp during execution
 	listRegexp.Rexp.PrintRegexp = printRegexp
 
