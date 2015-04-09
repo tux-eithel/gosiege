@@ -84,18 +84,16 @@ func (r *Requests) NextUri(isRandom bool) *InputRequest {
 
 	if len(r.Reqs) == 1 {
 		index = 0
+	} else if isRandom {
+		index = r.Rand.Intn(len(r.Reqs))
 	} else {
-		if isRandom {
-			index = r.Rand.Intn(len(r.Reqs))
-		} else {
 
-			if r.Cont+1 >= len(r.Reqs) {
-				r.Cont = 0
-			} else {
-				r.Cont++
-			}
-			index = r.Cont
+		if r.Cont+1 >= len(r.Reqs) {
+			r.Cont = 0
+		} else {
+			r.Cont++
 		}
+		index = r.Cont
 	}
 
 	r.Reqs[index].Hit++
@@ -103,7 +101,6 @@ func (r *Requests) NextUri(isRandom bool) *InputRequest {
 	oldObj := r.Reqs[index]
 
 	if r.MaxRequest > 0 && oldObj.Hit+1 > r.MaxRequest {
-
 		r.Reqs = append(r.Reqs[:index], r.Reqs[index+1:]...)
 
 	}
