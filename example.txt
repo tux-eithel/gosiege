@@ -1,6 +1,0 @@
-www.google.it
-http://donnad.it {"Cache-Control":"max-age=0"}
-www.google.it POST
-www.google.it POST {"Cache-Control":"max-age=0"}
-www.google.it POST {"Content-Type":"application/x-www-form-urlencoded"} id=2&user=100
-www.google.it POST {} id=2&user=100
