@@ -1,5 +1,5 @@
 {
-	"ImportPath": "bitbucket.org/tux-eithel/gosiege",
+	"ImportPath": "github.com/tux-eithel/gosiege",
 	"GoVersion": "go1.4.2",
 	"Deps": [
 		{
