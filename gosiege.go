@@ -148,35 +148,41 @@ func ToRun(
 
 			// fmt.Println("URL: ", req.Url)
 
-			rq, err = http.NewRequest(req.Method, req.Url, bytes.NewBuffer(req.Body))
-			if err != nil {
-				fmt.Println("Error preparing url, strange because it's already checked: ", req.Url)
-			}
-			for key, value := range req.Header {
-				rq.Header.Set(key, value)
-			}
-
-			t0 = time.Now()
-			r, err = http.DefaultClient.Do(rq)
-			diff = time.Since(t0)
-
+			rq, err = http.NewRequest(req.Method, req.Url, bytes.NewBufferString(req.Body))
 			if err != nil {
 
 				dataChannel <- &libgosiege.SimpleCounter{
-					Error: errors.New("Response Error: " + err.Error()),
+					Error: errors.New("Error preparing url '" + req.Url + "': " + err.Error()),
 				}
 
 			} else {
-
-				body, err = ioutil.ReadAll(r.Body)
-				qtaBody := -1
-				if err == nil {
-					qtaBody = len(body)
+				for key, value := range req.Header {
+					rq.Header.Set(key, value)
 				}
-				r.Body.Close()
+				fmt.Println(rq.Body)
 
-				dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, rq.URL.Path, r.Header)
+				t0 = time.Now()
+				r, err = http.DefaultClient.Do(rq)
+				diff = time.Since(t0)
 
+				if err != nil {
+
+					dataChannel <- &libgosiege.SimpleCounter{
+						Error: errors.New("Response Error: " + err.Error()),
+					}
+
+				} else {
+
+					body, err = ioutil.ReadAll(r.Body)
+					qtaBody := -1
+					if err == nil {
+						qtaBody = len(body)
+					}
+					r.Body.Close()
+
+					dataChannel <- libgosiege.NewSimpleCounter(float64(qtaBody), diff.Seconds(), r.StatusCode, rq.URL.Path, r.Header)
+
+				}
 			}
 
 			// wait the next call
