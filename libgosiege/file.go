@@ -53,7 +53,7 @@ func ParseAllInputFile(fileName string, request *Requests) {
 			switch row[1] {
 
 			case "POST":
-				appR, err = NewInputRequestComplex(url, row[1], nil, nil)
+				appR, err = NewInputRequestComplex(url, row[1], "", nil)
 
 			default:
 
@@ -62,7 +62,7 @@ func ParseAllInputFile(fileName string, request *Requests) {
 				if err != nil {
 					fmt.Println("Row - ", contRow, "Error parsing header:", err, " - ignored")
 				}
-				appR, err = NewInputRequestComplex(url, "GET", nil, jsonHeader)
+				appR, err = NewInputRequestComplex(url, "GET", "", jsonHeader)
 
 			}
 
@@ -77,7 +77,7 @@ func ParseAllInputFile(fileName string, request *Requests) {
 					fmt.Println("Row - ", contRow, "Error parsing header:", err, " - ignored")
 				}
 
-				appR, err = NewInputRequestComplex(url, row[1], nil, jsonHeader)
+				appR, err = NewInputRequestComplex(url, row[1], "", jsonHeader)
 
 			default:
 				err = errors.New(ErrorFormat)
@@ -96,7 +96,7 @@ func ParseAllInputFile(fileName string, request *Requests) {
 					log.Fatal("Error parsing header:", err)
 				}
 
-				appR, err = NewInputRequestComplex(url, row[1], []byte(row[3]), jsonHeader)
+				appR, err = NewInputRequestComplex(url, row[1], row[3], jsonHeader)
 
 			default:
 				err = errors.New(ErrorFormat)

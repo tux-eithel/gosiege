@@ -12,7 +12,7 @@ type InputRequest struct {
 	Method string
 	Url    string
 	Header map[string]string
-	Body   []byte
+	Body   string
 	Hit    int
 }
 
@@ -41,7 +41,7 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 	return in, nil
 }
 
-func NewInputRequestComplex(inputUrl, method string, body []byte, header map[string]string) (*InputRequest, error) {
+func NewInputRequestComplex(inputUrl, method, body string, header map[string]string) (*InputRequest, error) {
 
 	u, err := url.Parse(inputUrl)
 	if err != nil {
