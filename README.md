@@ -148,7 +148,7 @@ Simple POST request:
 POST request with some header. Header must be a valid json object (simple, only string)
 * `www.example.com POST {"Cache-Control":"max-age=0"}`
 
-POST reuqest with header and parameters
+POST request with header and parameters
 * `www.example.com POST {"Content-Type":"application/x-www-form-urlencoded"} id=2&user=100`
 
 POST request with only parameters
