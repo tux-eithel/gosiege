@@ -28,7 +28,7 @@ go get -u github.com/tux-eithel/gosiege/
 		`-exp "X-Cache .*"`
 
 -f fileName
-	File which contains for every row at least an url
+	File which contains at least an url for every row 
 
 -nasty=boolValue
 	Uses all available CPUs, physic and logic. Default true
@@ -111,12 +111,12 @@ Done.
 
 
 ### Statistics
-* Transactions: number server hits
-* Availability: percentage connections successfully handled by the serve. It's not included 40x and 50x errors
-* Elapsed time: duration entire test
+* Transactions: number of server hits
+* Availability: percentage connections successfully handled by the server. It's not included 40x and 50x errors
+* Elapsed time: duration of entire test
 * Transaction rate: transactions / elapsed time
 * Successful transactions: hits with code < 400
-* Failed transactions: hits with code >=400 (not included the socket error or timeout)
+* Failed transactions: hits with code >=400 (not included socket errors or timeouts)
 * Response time: average time to respond to each requests
 * Longest transaction: the slowest hit
 * Shortest transaction: the quickest hit
@@ -125,7 +125,7 @@ Done.
 
 If some regular expression is defined using `-exp`, for every regular expression:
 * name of HeaderField and Value of regular expression
-* number of transaction where HeaderField was present
+* number of transaction where HeaderField is present
 * percentage of connections with HeaderField present on total transactions
 * percentage of connections which matches the regular expression over transactions where HeaderField was present
 
@@ -161,4 +161,4 @@ POST request with only parameters
 
 
 ### Bugs
-Yeah there are bugs... help me to fix them :) !
+Yeah there are bugs... help me fix them :) !
