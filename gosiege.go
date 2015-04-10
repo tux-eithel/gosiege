@@ -72,6 +72,16 @@ func main() {
 		libgosiege.ParseAllInputFile(inputFile, listUrls.Req)
 	}
 
+	if numberConcurrent < 1 {
+		fmt.Println("So... Can you explain to me how to do without routine?")
+		return
+	}
+
+	if len(listUrls.Req.Reqs) < 1 {
+		fmt.Println("No input urls... yeah, nothing to do!")
+		return
+	}
+
 	// print regexp during execution
 	listRegexp.Rexp.PrintRegexp = printRegexp
 
