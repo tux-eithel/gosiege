@@ -13,7 +13,6 @@ type InputRequest struct {
 	Url    string
 	Header map[string]string
 	Body   []byte
-	Param  map[string]string
 	Hit    int
 }
 
