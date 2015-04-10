@@ -10,10 +10,13 @@ import (
 	"strings"
 )
 
+// Error constant
 const (
 	ErrorFormat = "Formatting error"
 )
 
+// ParseAllInputFile reads a file which contains urls defined like in example.txt
+// and prepare a InputRequest struct
 func ParseAllInputFile(fileName string, request *Requests) {
 
 	var err error

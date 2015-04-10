@@ -41,6 +41,8 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 	return in, nil
 }
 
+// NewInputRequestComplex creates a new InputRequest from a url string and set method, body and header
+// It works like NewInputRequest when is creating a InputRequest
 func NewInputRequestComplex(inputUrl, method, body string, header map[string]string) (*InputRequest, error) {
 
 	u, err := url.Parse(inputUrl)
