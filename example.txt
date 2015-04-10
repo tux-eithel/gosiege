@@ -1,3 +1,6 @@
-GET www.google.it
-GET http://donnad.it {""Cache-Control"":"max-age=0"}
-POST www.google.it 
+www.google.it
+http://donnad.it {"Cache-Control":"max-age=0"}
+www.google.it POST
+www.google.it POST {"Cache-Control":"max-age=0"}
+www.google.it POST {"Cache-Control":"max-age=0"} id=2&user=100
+www.google.it POST {} id=2&user=100
