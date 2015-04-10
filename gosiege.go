@@ -159,7 +159,6 @@ func ToRun(
 				for key, value := range req.Header {
 					rq.Header.Set(key, value)
 				}
-				fmt.Println(rq.Body)
 
 				t0 = time.Now()
 				r, err = http.DefaultClient.Do(rq)
