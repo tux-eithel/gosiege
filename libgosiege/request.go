@@ -41,6 +41,29 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 	return in, nil
 }
 
+func NewInputRequestComplex(inputUrl, method string, body []byte, header map[string]string) (*InputRequest, error) {
+
+	u, err := url.Parse(inputUrl)
+	if err != nil {
+		return nil, err
+	}
+	if u.Host == "" {
+		inputUrl = "//" + inputUrl
+	}
+	if u.Scheme == "" {
+		inputUrl = "http:" + inputUrl
+	}
+
+	in := &InputRequest{
+		Method: method,
+		Url:    inputUrl,
+	}
+	in.Body = body
+	in.Header = header
+
+	return in, nil
+}
+
 // Requests keeps all the InputRequest in one array.
 // Its structure also contains the current-1 object to extract in case of sequential reading,
 // or an object for random number generation in case of random reading
