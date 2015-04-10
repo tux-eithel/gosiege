@@ -13,10 +13,6 @@ I have added some useful features like:
 go get -u github.com/tux-eithel/gosiege/
 ```
 
-If you have installed [Godep](https://github.com/tools/godep)
-```
-godep restore
-```
 
 ### Command Line
 
