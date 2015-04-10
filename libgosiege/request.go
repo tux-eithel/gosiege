@@ -20,17 +20,11 @@ type InputRequest struct {
 // The new InputRequest is a basic GET request.
 // The function also modify the input url adding Host and Scheme if not specified.
 // For example google.com becames http://google.com
-func NewInputRequest(inputUrl string) (*InputRequest, error) {
+func NewInputRequest(inputURL string) (*InputRequest, error) {
 
-	u, err := url.Parse(inputUrl)
+	inputUrl, err := completeURL(inputURL)
 	if err != nil {
 		return nil, err
-	}
-	if u.Host == "" {
-		inputUrl = "//" + inputUrl
-	}
-	if u.Scheme == "" {
-		inputUrl = "http:" + inputUrl
 	}
 
 	in := &InputRequest{
@@ -43,17 +37,11 @@ func NewInputRequest(inputUrl string) (*InputRequest, error) {
 
 // NewInputRequestComplex creates a new InputRequest from a url string and set method, body and header
 // It works like NewInputRequest when is creating a InputRequest
-func NewInputRequestComplex(inputUrl, method, body string, header map[string]string) (*InputRequest, error) {
+func NewInputRequestComplex(inputURL, method, body string, header map[string]string) (*InputRequest, error) {
 
-	u, err := url.Parse(inputUrl)
+	inputUrl, err := completeURL(inputURL)
 	if err != nil {
 		return nil, err
-	}
-	if u.Host == "" {
-		inputUrl = "//" + inputUrl
-	}
-	if u.Scheme == "" {
-		inputUrl = "http:" + inputUrl
 	}
 
 	in := &InputRequest{
@@ -64,6 +52,22 @@ func NewInputRequestComplex(inputUrl, method, body string, header map[string]str
 	in.Header = header
 
 	return in, nil
+}
+
+// completeURL add http:// to the url if not present
+func completeURL(inputURL string) (string, error) {
+
+	u, err := url.Parse(inputURL)
+	if err != nil {
+		return "", err
+	}
+	if u.Host == "" {
+		inputURL = "//" + inputURL
+	}
+	if u.Scheme == "" {
+		inputURL = "http:" + inputURL
+	}
+	return inputURL, nil
 }
 
 // Requests keeps all the InputRequest in one array.
