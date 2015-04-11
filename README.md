@@ -50,7 +50,7 @@ go get -u github.com/tux-eithel/gosiege/
 	Values accepted according http://golang.org/pkg/time/#Duration. Default is 1s
 
 -u
-	List of urls (spaced separated) passed via CLI. It can be used along -f option
+	List of urls (space separated) passed via CLI. It can be used along -f option
 ```
 
 
@@ -124,16 +124,16 @@ Done.
 * Average bytes for transaction: average number of bytes transferred for request
 
 If some regular expression is defined using `-exp`, for every regular expression:
-* name of HeaderField and Value of regular expression
-* number of transaction where HeaderField is present
-* percentage of connections with HeaderField present on total transactions
-* percentage of connections which matches the regular expression over transactions where HeaderField was present
+* name of *HeaderField* and *Value* of regular expression
+* number of transaction where *HeaderField* is present
+* percentage of connections with *HeaderField* present on total transactions
+* percentage of connections which matches the regular expression over transactions where *HeaderField* was present
 
 
 ### Input File
 Input file can contains different urls. Every url may have some parameters.
-If an url doesn't match one of the below example, it will be skipped.
-Parameters are spaced separated.
+If an url doesn't match one of the below examples, it will be skipped.
+Parameters are space separated.
 
 #### Valid urls are:
 Simple GET request: automatically gosiege add http://
@@ -158,6 +158,7 @@ POST request with only parameters
 ### Tips
 * Ctrl+c for exit
 * You can use -f and -u together
+* Passing urls like *example.com*, gosiege add http:// in the front and make a GET request
 
 
 ### Bugs
