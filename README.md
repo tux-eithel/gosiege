@@ -158,7 +158,7 @@ POST request with only parameters
 ### Tips
 * Ctrl+c for exit
 * You can use -f and -u together
-* Passing urls like *example.com*, gosiege add http:// in the front and make a GET request
+* Passing urls like *example.com*, gosiege adds http:// in the front and makes a GET request
 
 
 ### Bugs
