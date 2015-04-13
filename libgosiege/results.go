@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/gommon/color"
 	"net/http"
 	"regexp"
-	"strconv"
+	_ "strconv"
 	"sync"
 	"time"
 )
@@ -214,6 +214,8 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 	var ok bool
 	var data *SimpleCounter
 
+	var srtStatus string
+
 	sumData := &GeneralCounter{}
 	start := time.Now()
 
@@ -239,23 +241,23 @@ func ProcessData(dataChannel chan *SimpleCounter, HC *CompareHeader, waitGroup *
 
 				// sum bad error, socket, system limit
 				sumData.NumBadError++
-				fmt.Println(color.Red(data.Error))
+				fmt.Println(color.RedBg(data.Error))
 
 			} else {
 
-				var srtStatus string
+				srtStatus = fmt.Sprintf("%d %.2fs %s %s", data.StatusCode, data.Elapsed, ByteSize(data.QtaBytes), data.Path)
+
 				switch {
 				case data.StatusCode >= 400 && 500 < data.StatusCode:
-					srtStatus = color.Yellow(data.StatusCode)
+					fmt.Println(color.Yellow(srtStatus))
 
 				case data.StatusCode >= 500:
-					srtStatus = color.Red(data.StatusCode)
+					fmt.Println(color.Red(srtStatus))
 
 				default:
-					srtStatus = strconv.Itoa(data.StatusCode)
+					fmt.Println(color.White(srtStatus))
 				}
 
-				fmt.Println(srtStatus, fmt.Sprintf("%.2fs", data.Elapsed), ByteSize(data.QtaBytes), data.Path)
 				HC.CompareAll(data.Header)
 
 				// qta bytes
